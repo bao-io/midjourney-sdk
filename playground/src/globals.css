@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#__next,
+.ant-spin-container {
+  @apply w-full h-full;
+}
+
+canvas[resize] {
+  @apply w-full h-full;
+}
+
+.form-item {
+  @apply flex md:items-center flex-col md:flex-row gap-2;
+}
+.form-item[required] label {
+  @apply before:content-['*'] before:text-red-500;
+}
+.form-item input {
+  @apply flex-1 bg-transparent rounded-md;
+}
+.form-item label {
+  @apply min-w-[100px];
+}
+
+.mj-btn {
+  @apply my-1 mr-2 py-[2px] px-4 rounded text-sm disabled:cursor-not-allowed bg-gray-600 hover:bg-gray-400 transition-all h-8 min-h-[32px] w-auto min-w-[60px] data-[style='3']:bg-green-600 data-[style='3']:hover:bg-green-700 data-[style='1']:bg-blue-600 data-[style='1']:hover:bg-blue-700 data-[style='4']:bg-red-600 data-[style='4']:hover:bg-red-700;
+}
+
+.editor-btn {
+  @apply p-2 rounded-full bg-gray-400/70 text-white;
+}
+
+.mj-form label {
+  @apply !text-white;
+}

@@ -1,0 +1,43 @@
+{
+  "name": "playground",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ant-design/cssinjs": "^1.17.0",
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.0.18",
+    "@svgr/webpack": "^8.1.0",
+    "@tailwindcss/forms": "^0.5.6",
+    "@tailwindcss/typography": "^0.5.9",
+    "@types/node": "20.5.1",
+    "@types/react": "18.2.20",
+    "@types/react-dom": "18.2.7",
+    "antd": "^5.9.0",
+    "autoprefixer": "10.4.15",
+    "clsx": "^2.0.0",
+    "dayjs": "^1.11.9",
+    "midjourney-sdk": "link:..",
+    "next": "13.4.19",
+    "paper": "^0.12.17",
+    "postcss": "8.4.28",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-markdown": "^8.0.7",
+    "react-scroll-to-bottom": "^4.2.0",
+    "react-textarea-autosize": "^8.5.3",
+    "remark-breaks": "^3.0.3",
+    "tailwindcss": "3.3.3",
+    "typescript": "5.1.6",
+    "zustand": "^4.4.1"
+  },
+  "devDependencies": {
+    "@types/react-scroll-to-bottom": "^4.2.1",
+    "postcss-scopify": "^0.1.10"
+  }
+}

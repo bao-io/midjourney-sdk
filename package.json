@@ -1,0 +1,83 @@
+{
+  "name": "midjourney-sdk",
+  "type": "module",
+  "version": "3.1.0",
+  "packageManager": "pnpm@8.7.5",
+  "description": "MidJourney in Discord API for Node.js.",
+  "author": "BaoBao <1727283040@qq.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/LaiBaoYuan/midjourney-sdk/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LaiBaoYuan/midjourney-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LaiBaoYuan/midjourney-sdk/issues"
+  },
+  "keywords": [
+    "midjourney",
+    "midjourney-api",
+    "midjourney-sdk",
+    "custom-zoom",
+    "vary-region",
+    "zoom-out",
+    "vary-strong",
+    "vary-subtle"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=16.20.0"
+  },
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "test": "vitest",
+    "lint": "eslint .",
+    "check": "tsc --noEmit",
+    "play": "pnpm -F playground dev",
+    "prepublishOnly": "pnpm run build",
+    "release": "bumpp && pnpm publish",
+    "format": "prettier --write .",
+    "prepare": "simple-git-hooks"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "eventemitter3": "^5.0.1",
+    "isomorphic-fetch": "^3.0.0",
+    "isomorphic-ws": "^5.0.0",
+    "snowyflake": "^2.0.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^2.4.6",
+    "@bbao/prettier-config": "^0.0.2",
+    "@types/isomorphic-fetch": "^0.0.39",
+    "@types/node": "^20.10.5",
+    "@types/ws": "^8.5.10",
+    "bumpp": "^9.2.1",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.1.1",
+    "simple-git-hooks": "^2.9.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged && pnpm check"
+  },
+  "lint-staged": {
+    "*": "eslint --fix"
+  }
+}
