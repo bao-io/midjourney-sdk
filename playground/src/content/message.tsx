@@ -1,7 +1,6 @@
-import { useMjStore } from '@/stores/mj'
 import { message } from 'antd'
-import { MessageInstance } from 'antd/es/message/interface'
-import { MjMsgType } from 'midjourney-sdk'
+import type { MessageInstance } from 'antd/es/message/interface'
+import type { MjMsgType } from 'midjourney-sdk'
 import React, { createContext, useState } from 'react'
 
 export const MessageContent = createContext<{
@@ -11,11 +10,11 @@ export const MessageContent = createContext<{
   setJobLoading: (val: boolean) => void
 } | null>(null)
 
-export const MessageProvider = ({
-  children
+export function MessageProvider({
+  children,
 }: {
   children: React.ReactNode
-}) => {
+}) {
   const [messageApi, contextHolder] = message.useMessage()
   const [jobLoading, setJobLoading] = useState(false)
   return (
@@ -30,7 +29,7 @@ export const MessageProvider = ({
           else if (type === 'REQUEST_FAILED')
             messageApi?.error('job execute failed!')
           setJobLoading(false)
-        }
+        },
       }}
     >
       {contextHolder}

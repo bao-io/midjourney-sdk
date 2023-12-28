@@ -1,10 +1,10 @@
-import { MessageContent } from '@/content/message'
-import { useMjStore } from '@/stores/mj'
 import { Button } from 'antd'
 import { useContext } from 'react'
+import { MessageContent } from '@/content/message'
+import { useMjStore } from '@/stores/mj'
 
 export default function Welcome() {
-  const [ins, handleMsg] = useMjStore((state) => [state.ins, state.handleMsg])
+  const [ins, handleMsg] = useMjStore(state => [state.ins, state.handleMsg])
   const ctx = useContext(MessageContent)
   return (
     <div className="flex flex-col gap-5 items-center py-5">
@@ -25,7 +25,7 @@ export default function Welcome() {
             onClick={() => {
               ctx?.setJobLoading(true)
               ins?.api.settings((type, msg) =>
-                handleMsg(type, msg, ctx?.handJobMsg)
+                handleMsg(type, msg, ctx?.handJobMsg),
               )
             }}
           >
@@ -36,7 +36,7 @@ export default function Welcome() {
             onClick={() => {
               ctx?.setJobLoading(true)
               ins?.api.info((type, msg) =>
-                handleMsg(type, msg, ctx?.handJobMsg)
+                handleMsg(type, msg, ctx?.handJobMsg),
               )
             }}
           >

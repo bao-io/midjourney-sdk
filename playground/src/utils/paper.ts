@@ -1,4 +1,5 @@
 import paper from 'paper'
+
 export const ce = new paper.PaperScope()
 
 type PaperToolEvent = paper.ToolEvent & { event: MouseEvent | TouchEvent }
@@ -34,33 +35,34 @@ export class MjPaper {
     this.checkerboardImage.scale(Math.max(this.width, this.height) / 1024)
     this.drawingLayer = new ce.Group({
       name: 'Drawing',
-      blendMode: 'destination-atop'
+      blendMode: 'destination-atop',
     })
     this.undoLayer = new ce.Group({
       name: 'Undo',
-      visible: false
+      visible: false,
     })
     this.redoLayer = new ce.Group({
       name: 'Redo',
-      visible: false
+      visible: false,
     })
     ce.project.activeLayer.addChildren([
       new ce.Group({
         name: 'CheckerboardCompositingGroup',
         children: [this.checkerboardImage, this.drawingLayer],
         blendMode: 'source-over',
-        opacity: 0.4
+        opacity: 0.4,
       }),
-      this.undoLayer
+      this.undoLayer,
     ])
     ce.project.activeLayer.addChild(this.redoLayer)
     ce.view.onFrame = () => {
       this.checkerboardImage.visible = false
-      for (let i = 0; i < this.drawingLayer.children.length; i++)
+      for (let i = 0; i < this.drawingLayer.children.length; i++) {
         if (this.drawingLayer.children[i].bounds.area > 0) {
           this.checkerboardImage.visible = true
           break
         }
+      }
     }
     ce.view.onResize = this.onResize.bind(this)
     this.toolbar = document.getElementById('appbody') as HTMLDivElement
@@ -79,48 +81,48 @@ export class MjPaper {
   }
 
   submit() {
-    let childLen = this.drawingLayer.children.length,
-      drawChild = this.drawingLayer.children
+    const childLen = this.drawingLayer.children.length
+    const drawChild = this.drawingLayer.children
     if (!childLen) {
       return Promise.reject(
-        "To use inpainting, start by dragging to select the areas of the image you'd like to replace."
+        'To use inpainting, start by dragging to select the areas of the image you\'d like to replace.',
       )
     }
     let areas = 0
     for (let i = 0; i < childLen; i++) {
-      let child = drawChild[i]
-      !child.name.includes('Image') &&
-        (areas += child.bounds.width * child.bounds.height)
+      const child = drawChild[i]
+      !child.name.includes('Image')
+      && (areas += child.bounds.width * child.bounds.height)
     }
     if (areas < 1e4) {
       return Promise.reject(
-        "For best results, you'll need to select more of the image to replace."
+        'For best results, you\'ll need to select more of the image to replace.',
       )
     }
 
-    let viewWidth = ce.view.viewSize.width,
-      viewHeight = ce.view.viewSize.height
+    const viewWidth = ce.view.viewSize.width
+    const viewHeight = ce.view.viewSize.height
     this.tool.clearSelection()
     ce.project.activeLayer.selected = false
     this.currentPath && (this.currentPath.bounds.selected = false)
-    let Z = this.drawingLayer.parent.opacity
+    const Z = this.drawingLayer.parent.opacity
     this.drawingLayer.parent.opacity = 1
     this.drawingLayer.blendMode = 'normal'
     this.checkerboardImage.visible = false
     this.onResize({
-      canonicalSpace: true
+      canonicalSpace: true,
     })
-    let selectRegions = new ce.Path.Rectangle(ce.view.bounds)
+    const selectRegions = new ce.Path.Rectangle(ce.view.bounds)
     selectRegions.fillColor = new ce.Color('#fff')
     selectRegions.sendToBack()
     for (let i = 0; i < childLen; i++) {
-      let child = drawChild[i]
+      const child = drawChild[i]
       !child.name.includes('Image') && (child.visible = true)
     }
-    let occluders = [],
-      bgImg = this.backgroundImage
+    const occluders = []
+    const bgImg = this.backgroundImage
     if (bgImg.name && bgImg.visible && bgImg.name.includes('Image')) {
-      let ye = new ce.Path.Rectangle(bgImg.bounds)
+      const ye = new ce.Path.Rectangle(bgImg.bounds)
       ye.fillColor = new ce.Color('#000')
       ye.insertAbove(bgImg)
       ye.name = 'Occluder'
@@ -130,23 +132,23 @@ export class MjPaper {
     ce.project.activeLayer.selected = false
     this.currentPath && (this.currentPath.bounds.selected = false)
     this.onResize({
-      canonicalSpace: true
+      canonicalSpace: true,
     })
     ce.view.update()
     this.tool.clearSelection()
     ce.project.activeLayer.selected = false
     this.currentPath && (this.currentPath.bounds.selected = !1)
     this.onResize({
-      canonicalSpace: true
+      canonicalSpace: true,
     })
-    let ctx = (ce.view as any).getContext(),
-      imgData = ctx.getImageData(
-        0,
-        0,
-        this.canvas.width / window.devicePixelRatio,
-        this.canvas.height / window.devicePixelRatio
-      ),
-      clampe = imgData.data
+    const ctx = (ce.view as any).getContext()
+    const imgData = ctx.getImageData(
+      0,
+      0,
+      this.canvas.width / window.devicePixelRatio,
+      this.canvas.height / window.devicePixelRatio,
+    )
+    const clampe = imgData.data
     for (let i = 0; i < clampe.length; i += 4) {
       clampe[i + 0] = clampe[i + 0] > 128 ? 255 : 0
       clampe[i + 1] = clampe[i + 1] > 128 ? 255 : 0
@@ -154,7 +156,7 @@ export class MjPaper {
       clampe[i + 3] = 255
     }
     ctx.putImageData(imgData, 0, 0)
-    let base64 = this.canvas.toDataURL('image/webp', 1)
+    const base64 = this.canvas.toDataURL('image/webp', 1)
     for (let i = 0; i < occluders.length; i++) {
       occluders[i].remove()
       selectRegions.remove()
@@ -165,38 +167,41 @@ export class MjPaper {
       this.drawingLayer.blendMode = 'destination-atop'
       this.checkerboardImage.visible = true
     }
-    let base64Str = base64.split(',')[1]
+    const base64Str = base64.split(',')[1]
     return Promise.resolve(base64Str)
   }
 
   processDoCommand(a: paper.Group, h: paper.Group, p: paper.Group) {
-    let d = h.lastChild
-    if (d)
+    const d = h.lastChild
+    if (d) {
       if (d.name && d.name.startsWith(this.removeCmd)) {
-        let M = d.name.substring(this.removeCmd.length),
-          F = a.getItem({
-            match: (Z: paper.Item) => Z.name == M
-          })
+        const M = d.name.substring(this.removeCmd.length)
+        const F = a.getItem({
+          match: (Z: paper.Item) => Z.name === M,
+        })
         p.addChild(F)
         d.remove()
-      } else {
-        let M = a.getItem({
-          match: (F: paper.Item) => F.name == d.name
+      }
+      else {
+        const M = a.getItem({
+          match: (F: paper.Item) => F.name === d.name,
         })
         if (M) {
-          let F = M.clone()
+          const F = M.clone()
           F.name = M.name
           p.addChild(F)
           M.replaceWith(d)
-        } else {
+        }
+        else {
           a.addChild(d)
           p.addChild(
             new ce.Group({
-              name: this.removeCmd + d.name
-            })
+              name: this.removeCmd + d.name,
+            }),
           )
         }
       }
+    }
   }
 
   onResize(e?: { canonicalSpace?: boolean }) {
@@ -204,26 +209,27 @@ export class MjPaper {
     if (e && e.canonicalSpace) {
       ce.view.viewSize.set(
         this.width / window.devicePixelRatio,
-        this.height / window.devicePixelRatio
+        this.height / window.devicePixelRatio,
       )
       ce.view.zoom = 1 / window.devicePixelRatio
-    } else {
-      let d = this.toolbar.getBoundingClientRect().height * 1.75
+    }
+    else {
+      const d = this.toolbar.getBoundingClientRect().height * 1.75
       h = d
-      let M = this.canvas.width / window.devicePixelRatio,
-        F = this.canvas.height / window.devicePixelRatio
+      const M = this.canvas.width / window.devicePixelRatio
+      const F = this.canvas.height / window.devicePixelRatio
       ce.view.zoom = Math.max(
         0.01,
-        Math.min(M / this.width, (F - d) / this.height) * 0.95
+        Math.min(M / this.width, (F - d) / this.height) * 0.95,
       )
     }
     ce.view.translate(
       new ce.Point(
         ce.view.center.x,
-        ce.view.center.y - (h * 0.5) / ce.view.zoom
-      )
+        ce.view.center.y - (h * 0.5) / ce.view.zoom,
+      ),
     ),
-      ce.view.update()
+    ce.view.update()
   }
 }
 
@@ -236,8 +242,9 @@ class Tool extends EventTarget {
   markForSave = false
   currentSegment: any
   currentPath:
-    | (paper.Path & { isRectangle?: boolean; isStroke?: boolean })
+    | (paper.Path & { isRectangle?: boolean, isStroke?: boolean })
     | null = null
+
   selectionRectPath: paper.Path | null = null
   selectedSegments: paper.Segment[] = []
   constructor(ur: MjPaper) {
@@ -257,24 +264,25 @@ class Tool extends EventTarget {
       fill: true,
       tolerance: this.lastTolerance,
       match: (h: paper.HitResult) =>
-        h.item.layer === ce.project.activeLayer &&
-        !h.item.name.includes('Background') &&
-        !h.item.name.includes('Checkerboard')
+        h.item.layer === ce.project.activeLayer
+        && !h.item.name.includes('Background')
+        && !h.item.name.includes('Checkerboard'),
     })
   }
+
   onMouseDown(e: PaperToolEvent) {
     this.clampToBounds(e)
-    this.button =
-      !(e.event as MouseEvent).button || (e.event as MouseEvent).button <= 0
+    this.button
+      = !(e.event as MouseEvent).button || (e.event as MouseEvent).button <= 0
         ? this.editor.selectedTool
         : (e.event as MouseEvent).button
-    this.minDistance = this.button == 2 ? this.lastTolerance * 2 : 0
+    this.minDistance = this.button === 2 ? this.lastTolerance * 2 : 0
     this.currentSegment = this.currentPath = null
-    let hitResult = this.hitTestActiveLayer(e.point)
+    const hitResult = this.hitTestActiveLayer(e.point)
     if (!this.button || this.button <= 0) {
       this.currentPath = new ce.Path.Rectangle({
         from: e.point,
-        to: e.point
+        to: e.point,
       })
       this.currentPath.strokeColor = new ce.Color('#eeeeee')
       this.currentPath.strokeColor.alpha = 1
@@ -285,9 +293,10 @@ class Tool extends EventTarget {
       this.currentPath.dashArray = [10, 10]
       this.currentPath.add(e.point)
       this.editor.drawingLayer.addChild(this.currentPath)
-    } else if (this.button == 0.5) {
+    }
+    else if (this.button === 0.5) {
       this.currentPath = new ce.Path({
-        segments: [e.point]
+        segments: [e.point],
       })
       this.currentPath.strokeWidth = 4
       this.currentPath.strokeColor = new ce.Color('rgba(255,255,255,1)')
@@ -298,72 +307,80 @@ class Tool extends EventTarget {
       this.currentPath.closed = true
       this.currentPath.fillColor = new ce.Color(1, 1, 1)
       this.editor.drawingLayer.addChild(this.currentPath)
-    } else if (this.button == 1) {
+    }
+    else if (this.button === 1) {
       if (!hitResult) {
         this.selectionRectPath = new ce.Path.Rectangle({
           from: e.point,
-          to: e.point
+          to: e.point,
         })
-      } else if (this.selectedSegments.length > 0) {
+      }
+      else if (this.selectedSegments.length > 0) {
         this.markForSave = true
-      } else {
+      }
+      else {
         this.currentPath = hitResult.item as paper.Path
         if (this.currentPath) {
           this.saveItemStateForUndo(hitResult.item)
-          if (hitResult.type == 'stroke' || hitResult.type == 'fill') {
+          if (hitResult.type === 'stroke' || hitResult.type === 'fill') {
             if (this.editor.movePath) {
               this.currentSegment = null
-            } else {
-              let location = hitResult.location
+            }
+            else {
+              const location = hitResult.location
               this.currentSegment = this.currentPath.insert(
                 location.index + 1,
-                e.point
+                e.point,
               )
               this.currentPath.smooth()
             }
           }
         }
       }
-    } else if (hitResult && this.button == 2) {
+    }
+    else if (hitResult && this.button === 2) {
       if (this.selectedSegments.length > 0) {
         for (let i = ce.project.selectedItems.length - 1; i >= 0; i--) {
-          let item = ce.project.selectedItems[i]
+          const item = ce.project.selectedItems[i]
           item.selected = false
           this.saveItemStateForUndo(item)
           item.remove()
         }
-      } else {
+      }
+      else {
         if (
-          hitResult.type == 'stroke' ||
-          hitResult.type == 'fill' ||
-          hitResult.segment.path.segments.length <= 2
+          hitResult.type === 'stroke'
+          || hitResult.type === 'fill'
+          || hitResult.segment.path.segments.length <= 2
         ) {
           this.saveItemStateForUndo(hitResult.item)
           hitResult.item.remove()
-        } else if (hitResult.type == 'segment') {
+        }
+        else if (hitResult.type === 'segment') {
           this.saveItemStateForUndo(hitResult.item)
           hitResult.segment.remove()
         }
       }
-      return
     }
   }
+
   onMouseMove(e: PaperToolEvent) {
-    if ((this.clampToBounds(e), this.selectedSegments.length == 0)) {
+    if ((this.clampToBounds(e), this.selectedSegments.length === 0)) {
       ce.project.activeLayer.selected = !1
-      let h = this.hitTestActiveLayer(e.point)
-      h &&
-        ((h.item.selected = !0),
-        h.item.strokeWidth &&
-          (this.lastTolerance = Math.max(h.item.strokeWidth / 4, 5)))
+      const h = this.hitTestActiveLayer(e.point)
+      h
+      && ((h.item.selected = !0),
+      h.item.strokeWidth
+      && (this.lastTolerance = Math.max(h.item.strokeWidth / 4, 5)))
     }
   }
+
   onMouseDrag(e: PaperToolEvent) {
     this.clampToBounds(e)
     if (!this.button || this.button <= 0) {
       ce.project.activeLayer.selected = false
       if (this.currentPath && this.currentPath.isRectangle) {
-        let h = new ce.Path.Rectangle(e.downPoint, e.point)
+        const h = new ce.Path.Rectangle(e.downPoint, e.point)
         h.fillColor = new ce.Color('#fff')
         this.currentPath.replaceWith(h)
         this.currentPath.remove()
@@ -371,24 +388,25 @@ class Tool extends EventTarget {
         this.currentPath.bounds.selected = true
         this.currentPath.isRectangle = true
       }
-    } else if (this.button == 0.5) {
+    }
+    else if (this.button === 0.5) {
       ce.project.activeLayer.selected = false
       this.currentPath!.add(e.point)
-    } else if (this.button == 1) {
+    }
+    else if (this.button === 1) {
       if (this.selectionRectPath) {
-        let newPath = new ce.Path.Rectangle(e.downPoint, e.point)
+        const newPath = new ce.Path.Rectangle(e.downPoint, e.point)
         this.selectionRectPath.replaceWith(newPath)
         this.selectionRectPath.remove()
         this.selectionRectPath = newPath
         this.selectionRectPath.bounds.selected = true
         this.selectedSegments = []
 
-        for (let i = 0; i < ce.project.selectedItems.length; i++) {
+        for (let i = 0; i < ce.project.selectedItems.length; i++)
           ce.project.selectedItems[i].selected = false
-        }
 
-        let overlappingItems = this.editor.drawingLayer.getItems({
-          overlapping: newPath.bounds
+        const overlappingItems = this.editor.drawingLayer.getItems({
+          overlapping: newPath.bounds,
         }) as paper.Path[]
 
         for (let i = 0; i < overlappingItems.length; i++) {
@@ -396,7 +414,7 @@ class Tool extends EventTarget {
             for (let j = 0; j < overlappingItems[i].segments.length; j++) {
               if (
                 this.selectionRectPath.bounds.contains(
-                  overlappingItems[i].segments[j].point
+                  overlappingItems[i].segments[j].point,
                 )
               ) {
                 overlappingItems[i].segments[j].selected = true
@@ -405,70 +423,71 @@ class Tool extends EventTarget {
             }
           }
         }
-      } else if (this.selectedSegments.length > 0) {
+      }
+      else if (this.selectedSegments.length > 0) {
         if (this.markForSave) {
-          for (let i = ce.project.selectedItems.length - 1; i >= 0; i--) {
+          for (let i = ce.project.selectedItems.length - 1; i >= 0; i--)
             this.saveItemStateForUndo(ce.project.selectedItems[i])
-          }
+
           this.markForSave = false
         }
 
         for (let i = 0; i < this.selectedSegments.length; i++) {
           this.selectedSegments[i].point = this.selectedSegments[i].point.add(
-            e.delta
+            e.delta,
           )
         }
-      } else {
-        if (this.currentSegment) {
-          this.currentSegment.point = this.currentSegment.point.add(e.delta)
-        } else if (this.currentPath) {
-          this.currentPath.position = this.currentPath.position.add(e.delta)
-        }
       }
-    } else if (this.button == 2) {
-      let hitResult = this.hitTestActiveLayer(e.point)
-      if (!hitResult) return
+      else {
+        if (this.currentSegment)
+          this.currentSegment.point = this.currentSegment.point.add(e.delta)
+        else if (this.currentPath)
+          this.currentPath.position = this.currentPath.position.add(e.delta)
+      }
+    }
+    else if (this.button === 2) {
+      const hitResult = this.hitTestActiveLayer(e.point)
+      if (!hitResult)
+        return
       if (
-        hitResult.type == 'stroke' ||
-        hitResult.type == 'fill' ||
-        hitResult.segment.path.segments.length <= 2
+        hitResult.type === 'stroke'
+        || hitResult.type === 'fill'
+        || hitResult.segment.path.segments.length <= 2
       ) {
         this.saveItemStateForUndo(hitResult.item)
         hitResult.item.remove()
-      } else if (hitResult.type == 'segment') {
+      }
+      else if (hitResult.type === 'segment') {
         this.saveItemStateForUndo(hitResult.item)
         hitResult.segment.remove()
       }
     }
   }
+
   onMouseUp(e: PaperToolEvent) {
     this.clampToBounds(e),
-      this.selectionRectPath &&
-        (this.selectionRectPath.remove(), (this.selectionRectPath = null)),
-      (!this.button || this.button <= 0.5) &&
-        this.currentPath &&
-        (this.currentPath.isRectangle ||
-          (this.currentPath.segments.length > 1
-            ? this.currentPath.simplify(3)
-            : this.currentPath.add(e.point),
-          (this.currentPath.strokeColor = new ce.Color('#ffffff'))),
-        this.clearSelection(),
-        // this.dispatchEvent(
-        //   new Event('newStroke', {
-        //     name: this.currentPath.name
-        //   })
-        // ),
-        (this.currentPath.bounds.selected = false),
-        (this.currentPath.name =
-          'Stroke-' + this.stringHashCode(this.currentPath.toString())),
-        (this.currentPath.strokeColor = null),
-        this.editor.undoLayer.addChild(
-          new ce.Group({
-            name: this.editor.removeCmd + this.currentPath.name
-          })
-        ),
-        this.editor.redoLayer.removeChildren())
+    this.selectionRectPath
+      && (this.selectionRectPath.remove(), (this.selectionRectPath = null)),
+    (!this.button || this.button <= 0.5)
+    && this.currentPath
+    && (this.currentPath.isRectangle
+    || (this.currentPath.segments.length > 1
+      ? this.currentPath.simplify(3)
+      : this.currentPath.add(e.point),
+    (this.currentPath.strokeColor = new ce.Color('#ffffff'))),
+    this.clearSelection(),
+    (this.currentPath.bounds.selected = false),
+    (this.currentPath.name
+          = `Stroke-${this.stringHashCode(this.currentPath.toString())}`),
+    (this.currentPath.strokeColor = null),
+    this.editor.undoLayer.addChild(
+      new ce.Group({
+        name: this.editor.removeCmd + this.currentPath.name,
+      }),
+    ),
+    this.editor.redoLayer.removeChildren())
   }
+
   clearSelection() {
     for (let a = 0; a < this.selectedSegments.length; a++)
       this.selectedSegments[a].selected = false
@@ -476,29 +495,33 @@ class Tool extends EventTarget {
     for (let a = 0; a < ce.project.selectedItems.length; a++)
       ce.project.selectedItems[a].selected = false
   }
+
   saveItemStateForUndo(item: paper.Item) {
-    item.name ||
-      (item.name = 'ForeignObject-' + this.stringHashCode(item.toString()))
-    let h = item.clone()
+    item.name
+    || (item.name = `ForeignObject-${this.stringHashCode(item.toString())}`)
+    const h = item.clone()
     h.name = item.name
     this.editor.undoLayer.addChild(h)
     this.editor.redoLayer.removeChildren()
   }
+
   stringHashCode(a: string) {
     let h = 0
-    if (a.length == 0) return h
+    if (a.length === 0)
+      return h
     for (let p = 0; p < a.length; p++) {
-      let d = a.charCodeAt(p)
+      const d = a.charCodeAt(p)
       ;(h = (h << 5) - h + d), (h = h & h)
     }
     return h
   }
+
   clampToBounds(e: PaperToolEvent) {
-    let width = this.editor.backgroundImageElement.width,
-      height = this.editor.backgroundImageElement.height
+    const width = this.editor.backgroundImageElement.width
+    const height = this.editor.backgroundImageElement.height
     e.point = e.point.set(
       Math.min(width * 0.5, Math.max(-width * 0.5, e.point.x)),
-      Math.min(height * 0.5, Math.max(-height * 0.5, e.point.y))
+      Math.min(height * 0.5, Math.max(-height * 0.5, e.point.y)),
     )
   }
 }

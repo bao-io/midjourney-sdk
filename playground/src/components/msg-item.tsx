@@ -1,15 +1,15 @@
-import { MjMessage } from 'midjourney-sdk'
-import { dayjs } from '../utils/dayjs'
+import type { MjMessage } from 'midjourney-sdk'
 import clsx from 'clsx'
 import ReactMarkdown from 'react-markdown'
 import RemarkBreaks from 'remark-breaks'
-import { useMjStore } from '@/stores/mj'
 import { useContext } from 'react'
-import { MessageContent } from '@/content/message'
 import { Image } from 'antd'
+import { dayjs } from '../utils/dayjs'
+import { MessageContent } from '@/content/message'
+import { useMjStore } from '@/stores/mj'
 
 export default function MsgItem({ item }: { item: MjMessage }) {
-  const [ins, handleMsg] = useMjStore((state) => [state.ins, state.handleMsg])
+  const [ins, handleMsg] = useMjStore(state => [state.ins, state.handleMsg])
   const ctx = useContext(MessageContent)
   return (
     <div className="flex flex-col gap-2 border-l-2 border-yellow-500 py-5 px-16 bg-yellow-500/10">
@@ -35,7 +35,7 @@ export default function MsgItem({ item }: { item: MjMessage }) {
           className={clsx(
             'rounded bg-neutral-800 p-4 border-l-4 flex flex-col gap-2 md:max-w-[600px]',
             item.embed.color === 16711680 && 'border-red-600',
-            item.embed.color === 0 && 'border-black'
+            item.embed.color === 0 && 'border-black',
           )}
         >
           <div>{item.embed.title}</div>
@@ -65,7 +65,7 @@ export default function MsgItem({ item }: { item: MjMessage }) {
                       item.id,
                       cv.custom_id,
                       item.flags!,
-                      (type, msg) => handleMsg(type, msg, ctx?.handJobMsg)
+                      (type, msg) => handleMsg(type, msg, ctx?.handJobMsg),
                     )
                   }}
                 >

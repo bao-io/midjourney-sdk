@@ -1,3 +1,6 @@
+import { useContext, useRef } from 'react'
+import type { FormInstance } from 'antd'
+import { Modal, Spin } from 'antd'
 import { MjLoginForm, MjRemixForm } from '@/components/mj-form'
 import Welcome from '@/components/welcome'
 import { useMjStore } from '@/stores/mj'
@@ -6,8 +9,6 @@ import MsgItem from '@/components/msg-item'
 import MjModal from '@/components/mj-modal'
 import InpaintingEditor from '@/components/inpainting-editor'
 import { MessageContent } from '@/content/message'
-import { useContext, useRef } from 'react'
-import { Spin, Modal, FormInstance } from 'antd'
 import { useHydrated } from '@/hooks'
 
 export default function Home() {
@@ -20,8 +21,8 @@ export default function Home() {
     setOpenRemixModal,
     varyRegionInfo,
     remixSubmitInfo,
-    handleMsg
-  ] = useMjStore((state) => [
+    handleMsg,
+  ] = useMjStore(state => [
     state.ins,
     state.mapping,
     state.openVaryRegion,
@@ -30,7 +31,7 @@ export default function Home() {
     state.setOpenRemixModal,
     state.varyRegionInfo,
     state.remixSubmitInfo,
-    state.handleMsg
+    state.handleMsg,
   ])
   const ctx = useContext(MessageContent)
   const hy = useHydrated()
@@ -42,7 +43,7 @@ export default function Home() {
         varyRegionInfo.varyRegionCustomId,
         prompt,
         mask,
-        (type, msg) => handleMsg(type, msg, ctx?.handJobMsg)
+        (type, msg) => handleMsg(type, msg, ctx?.handJobMsg),
       )
       setOpenVaryRegion(false)
     }
@@ -59,18 +60,20 @@ export default function Home() {
         {hy && (
           <>
             <Welcome />
-            {!ins?.initialize ? (
-              <MjLoginForm />
-            ) : (
-              <>
-                <div className="flex flex-col gap-4">
-                  {Object.entries(mapping).map(([k, v]) => (
-                    <MsgItem key={k} item={v} />
-                  ))}
-                </div>
-                <Footer />
-              </>
-            )}
+            {!ins?.initialize
+              ? (
+                <MjLoginForm />
+                )
+              : (
+                <>
+                  <div className="flex flex-col gap-4">
+                    {Object.entries(mapping).map(([k, v]) => (
+                      <MsgItem key={k} item={v} />
+                    ))}
+                  </div>
+                  <Footer />
+                </>
+                )}
             <MjModal
               show={openVaryRegion}
               setOpen={setOpenVaryRegion}
@@ -87,13 +90,13 @@ export default function Home() {
               onOk={() => {
                 formRef.current?.validateFields().then(({ prompt }) => {
                   ctx?.setJobLoading(true)
-                  let components = remixSubmitInfo.components
+                  const components = remixSubmitInfo.components
                   components.at(0)!.components.at(0).value = prompt
                   ins?.api.remixSubmit(
                     remixSubmitInfo.id,
                     remixSubmitInfo.custom_id,
                     components,
-                    (type, msg) => handleMsg(type, msg, ctx?.handJobMsg)
+                    (type, msg) => handleMsg(type, msg, ctx?.handJobMsg),
                   )
                   setOpenRemixModal(false)
                 })

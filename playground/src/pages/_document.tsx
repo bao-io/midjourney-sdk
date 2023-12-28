@@ -1,29 +1,31 @@
 import React from 'react'
-import { createCache, extractStyle, StyleProvider } from '@ant-design/cssinjs'
+import { StyleProvider, createCache, extractStyle } from '@ant-design/cssinjs'
 import Document, { Head, Html, Main, NextScript } from 'next/document'
 import type { DocumentContext } from 'next/document'
 
-const MyDocument = () => (
-  <Html lang="en">
-    <Head />
-    <body>
-      <Main />
-      <NextScript />
-    </body>
-  </Html>
-)
+function MyDocument() {
+  return (
+    <Html lang="en">
+      <Head />
+      <body>
+        <Main />
+        <NextScript />
+      </body>
+    </Html>
+  )
+}
 
 MyDocument.getInitialProps = async (ctx: DocumentContext) => {
   const cache = createCache()
   const originalRenderPage = ctx.renderPage
   ctx.renderPage = () =>
     originalRenderPage({
-      enhanceApp: (App) => (props) =>
+      enhanceApp: App => props =>
         (
           <StyleProvider cache={cache} hashPriority="high">
             <App {...props} />
           </StyleProvider>
-        )
+        ),
     })
 
   const initialProps = await Document.getInitialProps(ctx)
@@ -35,7 +37,7 @@ MyDocument.getInitialProps = async (ctx: DocumentContext) => {
         {initialProps.styles}
         <style dangerouslySetInnerHTML={{ __html: style }} />
       </>
-    )
+    ),
   }
 }
 

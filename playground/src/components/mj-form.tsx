@@ -1,11 +1,13 @@
-import { MidJourneyOptions, defaultOpts } from 'midjourney-sdk'
+import type { MidJourneyOptions } from 'midjourney-sdk'
+import { defaultOpts } from 'midjourney-sdk'
 import { forwardRef, useContext, useState } from 'react'
+import type { FormInstance } from 'antd'
+import { Button, Form, Input } from 'antd'
 import { useMjStore } from '@/stores/mj'
-import { Button, Form, FormInstance, Input } from 'antd'
 import { MessageContent } from '@/content/message'
 
-export const MjLoginForm = () => {
-  const init = useMjStore((state) => state.init)
+export function MjLoginForm() {
+  const init = useMjStore(state => state.init)
   const [loading, setLoading] = useState(false)
   const ctx = useContext(MessageContent)
   return (
@@ -18,19 +20,19 @@ export const MjLoginForm = () => {
         guild_id: process.env.NEXT_PUBLIC_GUILD_ID as string,
         channel_id: process.env.NEXT_PUBLIC_CHANNEL_ID as string,
         apiBaseUrl:
-          (process.env.NEXT_PUBLIC_API_BASE_URL as string) ||
-          defaultOpts.apiBaseUrl,
+          (process.env.NEXT_PUBLIC_API_BASE_URL as string)
+          || defaultOpts.apiBaseUrl,
         wsBaseUrl:
-          (process.env.NEXT_PUBLIC_WS_BASE_URL as string) ||
-          defaultOpts.wsBaseUrl,
+          (process.env.NEXT_PUBLIC_WS_BASE_URL as string)
+          || defaultOpts.wsBaseUrl,
         imgBaseUrl:
-          (process.env.NEXT_PUBLIC_IMG_BASE_URL as string) ||
-          defaultOpts.imgBaseUrl
+          (process.env.NEXT_PUBLIC_IMG_BASE_URL as string)
+          || defaultOpts.imgBaseUrl,
       }}
       onFinish={(form) => {
         setLoading(true)
         return init(form)
-          .catch((err) => ctx?.ins.error(err.message))
+          .catch(err => ctx?.ins.error(err.message))
           .finally(() => setLoading(false))
       }}
     >
@@ -78,8 +80,8 @@ export const MjLoginForm = () => {
   )
 }
 
-export const MjRemixForm = forwardRef<FormInstance>(({}, formRef) => {
-  const components = useMjStore((state) => state.remixSubmitInfo.components)
+export const MjRemixForm = forwardRef<FormInstance>((_, formRef) => {
+  const components = useMjStore(state => state.remixSubmitInfo.components)
   return (
     <Form
       layout="vertical"
@@ -92,8 +94,8 @@ export const MjRemixForm = forwardRef<FormInstance>(({}, formRef) => {
         rules={[
           {
             required: true,
-            message: 'Please enter the image prompt!'
-          }
+            message: 'Please enter the image prompt!',
+          },
         ]}
       >
         <Input.TextArea
@@ -101,7 +103,8 @@ export const MjRemixForm = forwardRef<FormInstance>(({}, formRef) => {
           rows={5}
           showCount
           maxLength={4000}
-        ></Input.TextArea>
+        >
+        </Input.TextArea>
       </Form.Item>
     </Form>
   )

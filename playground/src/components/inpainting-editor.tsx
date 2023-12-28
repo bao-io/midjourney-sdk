@@ -1,28 +1,28 @@
-import { MjPaper, ce } from '@/utils/paper'
 import TextareaAutosize from 'react-textarea-autosize'
+import { useContext, useEffect, useRef, useState } from 'react'
+import clsx from 'clsx'
+import { MjPaper, ce } from '@/utils/paper'
 import Undo from '@/icons/undo.svg'
 import Send from '@/icons/send.svg'
 import Rect from '@/icons/rect.svg'
 import Lasso from '@/icons/lasso.svg'
-import { useContext, useEffect, useRef, useState } from 'react'
 import { useMjStore } from '@/stores/mj'
-import clsx from 'clsx'
 import { MessageContent } from '@/content/message'
 
 export default function InpaintingEditor({
-  submit
+  submit,
 }: {
   submit: (mask: string, prompt: string) => void
 }) {
   const [paper, setPaper] = useState<MjPaper | null>(null)
   const [selectedTool, setTool] = useState<0 | 0.5>(0)
   const canvas = useRef<HTMLCanvasElement>(null)
-  const varyRegionInfo = useMjStore((state) => state.varyRegionInfo)
+  const varyRegionInfo = useMjStore(state => state.varyRegionInfo)
   const [input, setInput] = useState(varyRegionInfo.varyRegionPrompt)
   const ctx = useContext(MessageContent)
   const btns = [
     { label: 'rect', value: 0, icon: Rect },
-    { label: 'lasso', value: 0.5, icon: Lasso }
+    { label: 'lasso', value: 0.5, icon: Lasso },
   ] as const
   const getImg = () =>
     new Promise<HTMLImageElement>((s) => {
@@ -45,8 +45,8 @@ export default function InpaintingEditor({
     ctx?.setJobLoading(true)
     paper
       ?.submit()
-      .then((mask) => submit(mask, input))
-      .catch((errMsg) => ctx?.ins.error(errMsg))
+      .then(mask => submit(mask, input))
+      .catch(errMsg => ctx?.ins.error(errMsg))
   }
   useEffect(() => {
     init()
@@ -56,7 +56,7 @@ export default function InpaintingEditor({
     <>
       <div className="flex-1 flex items-center justify-center absolute inset-0 h-full">
         <canvas
-          //@ts-ignore
+          // @ts-expect-error
           hidpi="on"
           ref={canvas}
           width="1024"
@@ -66,9 +66,10 @@ export default function InpaintingEditor({
             padding: '0px',
             margin: '0px',
             width: '100%',
-            maxWidth: '960px'
+            maxWidth: '960px',
           }}
-        ></canvas>
+        >
+        </canvas>
       </div>
       <div className="fixed top-20 left-3 flex justify-center items-center">
         <button className="editor-btn border" onClick={() => paper?.undo()}>
@@ -85,13 +86,13 @@ export default function InpaintingEditor({
               key={i}
               className={clsx(
                 'editor-btn',
-                selectedTool === v.value && '!bg-gray-400'
+                selectedTool === v.value && '!bg-gray-400',
               )}
               onClick={() => {
-                paper &&
-                  setPaper((paper) =>
-                    Object.assign(paper!, { selectedTool: v.value })
-                  )
+                paper
+                && setPaper(paper =>
+                  Object.assign(paper!, { selectedTool: v.value }),
+                )
                 setTool(v.value)
               }}
             >
@@ -105,7 +106,7 @@ export default function InpaintingEditor({
             rows={1}
             className="resize-none overflow-hidden flex-1 !border-gray-200 rounded"
             placeholder="send a prompt"
-            onChange={(e) => setInput(e.target.value)}
+            onChange={e => setInput(e.target.value)}
           />
           <button className="editor-btn flex-shrink-0" onClick={handleSubmit}>
             <Send className="w-5 h-5" />

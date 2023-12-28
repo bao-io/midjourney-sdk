@@ -1,9 +1,11 @@
-import {
-  MidJourney,
+import type {
   MidJourneyOptions,
   MjMessage,
   MjMsgType,
-  MjOriginMessage
+  MjOriginMessage,
+} from 'midjourney-sdk'
+import {
+  MidJourney,
 } from 'midjourney-sdk'
 import { create } from 'zustand'
 
@@ -41,17 +43,17 @@ export const useMjStore = create<IMjStore>((set, get) => ({
   varyRegionInfo: {
     varyRegionImgBase64: '',
     varyRegionCustomId: '',
-    varyRegionPrompt: ''
+    varyRegionPrompt: '',
   },
   remixSubmitInfo: {
     id: '',
     custom_id: '',
-    components: []
+    components: [],
   },
   openVaryRegion: false,
   openRemixModal: false,
   async init(opts) {
-    return new MidJourney(opts).init().then((ins) => set(() => ({ ins })))
+    return new MidJourney(opts).init().then(ins => set(() => ({ ins })))
   },
   setOpenVaryRegion(openVaryRegion) {
     set({ openVaryRegion })
@@ -66,45 +68,49 @@ export const useMjStore = create<IMjStore>((set, get) => ({
   },
   handleMsg(type, msg, cb) {
     console.log(
-      `msgType: ${type}, eventId: ${msg.nonce}, msgId: ${msg.id}, parentId: ${msg.parentId}, originId: ${msg.originId}, progress: ${msg.progress}`
+      `msgType: ${type}, eventId: ${msg.nonce}, msgId: ${msg.id}, parentId: ${msg.parentId}, originId: ${msg.originId}, progress: ${msg.progress}`,
     )
     if (type === 'REQUEST_SUCCESS' || type === 'REQUEST_FAILED') {
       cb?.(type)
-    } else if (type === 'MESSAGE_DELETE') {
+    }
+    else if (type === 'MESSAGE_DELETE') {
       get().updateMapping((mapping) => {
         delete mapping[msg.id]
       })
-    } else if (
-      type === 'INTERACTION_IFRAME_MODAL_CREATE' &&
-      msg.varyRegionImgBase64 &&
-      msg.custom_id &&
-      msg.varyRegionPrompt
+    }
+    else if (
+      type === 'INTERACTION_IFRAME_MODAL_CREATE'
+        && msg.varyRegionImgBase64
+        && msg.custom_id
+        && msg.varyRegionPrompt
     ) {
       set({
         openVaryRegion: true,
         varyRegionInfo: {
           varyRegionCustomId: msg.custom_id,
           varyRegionImgBase64: msg.varyRegionImgBase64,
-          varyRegionPrompt: msg.varyRegionPrompt
-        }
+          varyRegionPrompt: msg.varyRegionPrompt,
+        },
       })
-    } else if (
-      type === 'INTERACTION_MODAL_CREATE' &&
-      msg.custom_id &&
-      msg.components?.length
+    }
+    else if (
+      type === 'INTERACTION_MODAL_CREATE'
+        && msg.custom_id
+        && msg.components?.length
     ) {
       set({
         openRemixModal: true,
         remixSubmitInfo: {
           id: msg.id,
           components: msg.components,
-          custom_id: msg.custom_id
-        }
+          custom_id: msg.custom_id,
+        },
       })
-    } else {
+    }
+    else {
       get().updateMapping((mapping) => {
         mapping[msg.id] = msg
       })
     }
-  }
+  },
 }))

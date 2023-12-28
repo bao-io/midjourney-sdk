@@ -9,7 +9,7 @@ export default function MjModal({
   title,
   panelClass,
   fullscreen,
-  children
+  children,
 }: {
   show: boolean
   setOpen: (val: boolean) => void
@@ -41,7 +41,7 @@ export default function MjModal({
           <div
             className={clsx(
               'flex min-h-full justify-center',
-              fullscreen ? 'h-full items-stretch' : 'p-4 items-center'
+              fullscreen ? 'h-full items-stretch' : 'p-4 items-center',
             )}
           >
             <Transition.Child
@@ -57,7 +57,7 @@ export default function MjModal({
                 className={clsx(
                   'bg-white p-6 shadow-xl transition-all w-full flex flex-col gap-2 overflow-hidden',
                   !fullscreen && 'rounded-md',
-                  panelClass
+                  panelClass,
                 )}
               >
                 <Dialog.Title className="text-lg font-medium leading-6 text-gray-900 flex items-center justify-between z-50">

@@ -45,6 +45,7 @@
     "build": "tsup",
     "test": "vitest",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "check": "tsc --noEmit",
     "play": "pnpm -F playground dev",
     "prepublishOnly": "pnpm run build",
