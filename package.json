@@ -51,7 +51,8 @@
     "prepublishOnly": "pnpm run build",
     "release": "bumpp && pnpm publish",
     "format": "prettier --write .",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "postinstall": "pnpm build"
   },
   "dependencies": {
     "chalk": "^5.3.0",

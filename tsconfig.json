@@ -9,5 +9,6 @@
     "noUnusedLocals": true,
     "esModuleInterop": true,
     "skipLibCheck": true
-  }
+  },
+  "exclude": ["playground"]
 }
