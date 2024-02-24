@@ -1,7 +1,7 @@
 {
   "name": "midjourney-sdk",
   "type": "module",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "packageManager": "pnpm@8.7.5",
   "description": "MidJourney in Discord API for Node.js.",
   "author": "BaoBao <1727283040@qq.com>",
